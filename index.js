@@ -20,27 +20,6 @@ const lastVideoIds = {};
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  // 🧪 ส่งแจ้งเตือนล่าสุดทันทีรอบแรก เพื่อทดสอบ
-  //   for (const channel of youtubeChannels) {
-  //     try {
-  //       const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
-  //       const feed = await parser.parseURL(feedUrl);
-  //       const latest = feed.items[0];
-  //       if (!latest) continue;
-
-  //       lastVideoIds[channel.channelId] = latest.id;
-
-  //       const discordChannel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-  //       await discordChannel.send(
-  //         `🧪 ทดสอบแจ้งเตือน: **${channel.name}**\n**${latest.title}**\n${latest.link}`
-  //       );
-  //       console.log(`🧪 แจ้งเตือนทดสอบจาก ${channel.name}: ${latest.title}`);
-  //     } catch (err) {
-  //       console.error(`❌ Error ขณะทดสอบจาก ${channel.name}:`, err.message);
-  //     }
-  //   }
-
-  // 🔁 เริ่มระบบตรวจวิดีโอใหม่ทุก X นาที
   setInterval(async () => {
     for (const channel of youtubeChannels) {
       const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channel.channelId}`;
@@ -50,6 +29,13 @@ client.once('ready', async () => {
         const latest = feed.items[0];
         if (!latest) continue;
 
+        // ✅ ไม่แจ้งรอบแรก
+        if (!lastVideoIds[channel.channelId]) {
+          lastVideoIds[channel.channelId] = latest.id;
+          continue;
+        }
+
+        // ✅ แจ้งเฉพาะเมื่อมีวิดีโอใหม่
         if (latest.id !== lastVideoIds[channel.channelId]) {
           lastVideoIds[channel.channelId] = latest.id;
 
@@ -67,5 +53,6 @@ client.once('ready', async () => {
     }
   }, CHECK_INTERVAL_MINUTES * 60 * 1000);
 });
+
 
 client.login(DISCORD_TOKEN);
