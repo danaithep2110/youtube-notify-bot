@@ -12,7 +12,7 @@ const CHECK_INTERVAL_MINUTES = 1;
 const youtubeChannels = [
   { name: 'CAKE REMIXER X2', channelId: 'UCt7DlBKS018jXzgbKb7kH2Q' },
   { name: 'CHAMP REMIX', channelId: 'UC_J5mFi8imGhUON6dGqSm1g' },
-  { name: 'แอดมินท้ายสวนปาล์ม', channelId: 'UC5DxFtI-DbJcvpGUrW9VwVw' }
+  { name: 'แอดมินท้ายสวนปาล์ม', channelId: 'UC5DxFtI-UCuJSCeqCc7C20j1R5JYLRTQ' }
 ];
 
 const lastVideoIds = {};
