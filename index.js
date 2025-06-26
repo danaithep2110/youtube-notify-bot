@@ -1,8 +1,9 @@
 require('dotenv').config();
-
+const fs = require('fs');
 const { Client, GatewayIntentBits } = require('discord.js');
 const Parser = require('rss-parser');
 const parser = new Parser();
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
@@ -15,7 +16,13 @@ const youtubeChannels = [
   { name: 'แอดมินท้ายสวนปาล์ม', channelId: 'UCuJSCeqCc7C20j1R5JYLRTQ' }
 ];
 
-const lastVideoIds = {};
+const LAST_VIDEO_PATH = './latest.json';
+let lastVideoIds = {};
+
+// 📁 โหลดค่าที่เคยบันทึกไว้ก่อนหน้า
+if (fs.existsSync(LAST_VIDEO_PATH)) {
+  lastVideoIds = JSON.parse(fs.readFileSync(LAST_VIDEO_PATH, 'utf8'));
+}
 
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
@@ -29,30 +36,24 @@ client.once('ready', async () => {
         const latest = feed.items[0];
         if (!latest) continue;
 
-        // ✅ ไม่แจ้งรอบแรก
-        if (!lastVideoIds[channel.channelId]) {
-          lastVideoIds[channel.channelId] = latest.id;
-          continue;
-        }
+        // 🔍 ตรวจว่าเคยแจ้งแล้วหรือยัง
+        if (lastVideoIds[channel.channelId] === latest.id) continue;
 
-        // ✅ แจ้งเฉพาะเมื่อมีวิดีโอใหม่
-        if (latest.id !== lastVideoIds[channel.channelId]) {
-          lastVideoIds[channel.channelId] = latest.id;
+        // 💾 อัปเดตและบันทึกไฟล์
+        lastVideoIds[channel.channelId] = latest.id;
+        fs.writeFileSync(LAST_VIDEO_PATH, JSON.stringify(lastVideoIds, null, 2));
 
-          const discordChannel = await client.channels.fetch(DISCORD_CHANNEL_ID);
-          await discordChannel.send(
-            `📢 **${channel.name}** มีวิดีโอใหม่! @everyone\n**${latest.title}**\n${latest.link}`
-          );
+        const discordChannel = await client.channels.fetch(DISCORD_CHANNEL_ID);
+        await discordChannel.send(
+          `📢 **${channel.name}** มีวิดีโอใหม่! @everyone\n**${latest.title}**\n${latest.link}`
+        );
 
-          console.log(`✅ แจ้งเตือนวิดีโอจาก ${channel.name}: ${latest.title}`);
-        }
-
+        console.log(`✅ แจ้งเตือนวิดีโอจาก ${channel.name}: ${latest.title}`);
       } catch (error) {
         console.error(`❌ Error จากช่อง ${channel.name}:`, error.message);
       }
     }
   }, CHECK_INTERVAL_MINUTES * 60 * 1000);
 });
-
 
 client.login(DISCORD_TOKEN);
