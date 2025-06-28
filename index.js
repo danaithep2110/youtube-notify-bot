@@ -45,7 +45,7 @@ client.once('ready', async () => {
 
         const discordChannel = await client.channels.fetch(DISCORD_CHANNEL_ID);
         await discordChannel.send(
-          `📢 **${channel.name}** มีวิดีโอใหม่! @everyone\n**${latest.title}**\n${latest.link}`
+          `📢 **${channel.name}** มีวิดีโอใหม่! \n**${latest.title}**\n${latest.link}`
         );
 
         console.log(`✅ แจ้งเตือนวิดีโอจาก ${channel.name}: ${latest.title}`);
